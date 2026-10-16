@@ -10,6 +10,18 @@
 </p>
 <p align="center">Windows x64 · English / Russian · MIT</p>
 
+## 💡 Why PCB Marker exists
+
+PCB Marker was created with a practical goal: use an existing 3D printer to
+transfer a PCB layout onto a blank board with a marker.
+
+You have a circuit designed in your PCB editor and a board ready to work on.
+Export the Gerber files, attach a marker to the printer, and secure the board
+on the bed. PCB Marker aligns the layout with the board, prepares the drawing
+route, and lets you check it in a preview and a dry run before the marker touches
+the surface. Then the printer draws the tracks and pad rings while you follow
+its progress in the app.
+
 ![Board view in PCB Marker](https://raw.githubusercontent.com/zufari4/pcb-marker/main/docs/screenshots/board.png)
 
 ## ✨ What you can do
