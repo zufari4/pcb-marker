@@ -53,15 +53,15 @@ so Windows may display a warning on first launch.
 
 ### Install with npm
 
-The package is **ready for publication but is not yet available on the npm registry**.
-Once published, install it with Node.js 22.12 or newer:
+Install [pcb-marker-desktop](https://www.npmjs.com/package/pcb-marker-desktop)
+with Node.js 22.12 or newer:
 
 ```sh
 npm install -g pcb-marker-desktop
 pcb-marker
 ```
 
-This opens the full desktop app. Until registry publication, download the `.tgz`
+This opens the full desktop app. You can also download the `.tgz`
 package from [Releases](https://github.com/zufari4/pcb-marker/releases/latest) and install it locally:
 
 ```sh

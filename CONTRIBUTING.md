@@ -46,7 +46,7 @@ npm login
 npm publish --access public
 ```
 
-The initial npm publication is a separate manual step. After it succeeds,
-remove the pending-publication notice from README.md. Do not put registry
+Publishing to npm is a separate manual step from the GitHub release workflow.
+Use a new package version for each subsequent publication. Do not put registry
 tokens in this repository. Third-party license notices are in
 THIRD_PARTY_NOTICES.md and the built `dist/licenses` directory.
