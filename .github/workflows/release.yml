@@ -2,6 +2,8 @@ name: Windows release
 on:
   push:
     tags: ['v*']
+    branches: [main]
+    paths: ['.github/workflows/release.yml']
 permissions:
   contents: write
 jobs:
@@ -18,9 +20,20 @@ jobs:
         shell: pwsh
         run: |
           $version = (Get-Content package.json | ConvertFrom-Json).version
-          if ($env:GITHUB_REF_NAME -ne "v$version") { throw 'Tag must match package.json version' }
+          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -ne "v$version") { throw 'Tag must match package.json version' }
+          "RELEASE_TAG=v$version" >> $env:GITHUB_ENV
       - run: npm test
-      - run: npm run release:win
+      - name: Build Windows downloads
+        shell: pwsh
+        run: |
+          npm run release:win 2>&1 | Tee-Object -FilePath build-release.log
+          $buildExit = $LASTEXITCODE
+          if ($buildExit -ne 0) {
+            '```text' >> $env:GITHUB_STEP_SUMMARY
+            Get-Content build-release.log -Tail 80 >> $env:GITHUB_STEP_SUMMARY
+            '```' >> $env:GITHUB_STEP_SUMMARY
+            exit $buildExit
+          }
       - name: Package npm distribution without publishing
         run: npm pack --ignore-scripts
       - name: Publish downloads
@@ -32,5 +45,5 @@ jobs:
           $directory = Split-Path (Split-Path $latest.executable)
           $files = @(Get-ChildItem -LiteralPath $directory -File | Where-Object { $_.Extension -in '.exe', '.zip' -or $_.Name -eq 'SHA256SUMS.txt' } | ForEach-Object { $_.FullName })
           $files += @(Get-ChildItem -Filter '*.tgz' -File | ForEach-Object { $_.FullName })
-          gh release create $env:GITHUB_REF_NAME @files --verify-tag --title "PCB Marker $env:GITHUB_REF_NAME" --notes-file releases/NOTES.md
+          gh release create $env:RELEASE_TAG @files --verify-tag --title "PCB Marker $env:RELEASE_TAG" --notes-file releases/NOTES.md
           if ($LASTEXITCODE -ne 0) { throw 'Release upload failed' }
