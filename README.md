@@ -2,8 +2,7 @@
   <img src="https://raw.githubusercontent.com/zufari4/pcb-marker/main/assets/icon.png" width="112" alt="PCB Marker — an M made of PCB traces and pads">
 </p>
 <h1 align="center">PCB Marker</h1>
-<p align="center"><b>Turn your 3D printer into a PCB marker plotter.</b></p>
-<p align="center">Open a Gerber file, align your board, preview the path, and start drawing.</p>
+<p align="center">PCB Marker draws PCB traces from Gerber files using a marker mounted on a Klipper-based 3D printer.</p>
 <p align="center">
   <a href="https://github.com/zufari4/pcb-marker/releases/latest">Download for Windows</a> ·
   <a href="#-getting-started">Getting started</a> ·
