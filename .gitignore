@@ -1,0 +1,21 @@
+node_modules/
+dist/
+release/
+.artifacts/
+.packaging/
+*.log
+*.tgz
+*.tsbuildinfo
+.env
+.env.*
+.npmrc
+.DS_Store
+Thumbs.db
+Запустить PCB Marker.cmd
+settings.json
+printer_connection.json
+*.pem
+*.key
+# Local diagnostics tied to a private printer/profile, not distribution tools.
+scripts/check-printer.ts
+scripts/connection-smoke.mjs

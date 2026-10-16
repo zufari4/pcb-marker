@@ -1,0 +1,115 @@
+{
+  "name": "pcb-marker-desktop",
+  "version": "1.0.0",
+  "description": "Gerber PCB marker plotter for Klipper printers",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "main": "dist/main/index.cjs",
+  "bin": {
+    "pcb-marker": "bin/cli.cjs"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "THIRD_PARTY_NOTICES.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc --noEmit && node scripts/build.mjs && vite build",
+    "start": "electron .",
+    "dev": "npm run build && electron .",
+    "test": "tsx --test tests/*.test.ts",
+    "check": "tsc --noEmit",
+    "pack:win": "npm run build && node scripts/package.mjs",
+    "installer": "npm run build && node scripts/package.mjs --installer",
+    "test:ui": "tsx scripts/ui-smoke.mjs",
+    "format": "prettier --write src scripts tests",
+    "prepack": "npm run build",
+    "release:win": "npm run build && node scripts/package.mjs --release"
+  },
+  "dependencies": {
+    "electron": "^44.8.0",
+    "ssh2": "^1.17.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/ssh2": "^1.15.0",
+    "electron-builder": "^26.0.0",
+    "esbuild": "^0.25.0",
+    "prettier": "^3.9.10",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.0.0",
+    "fflate": "^0.8.2",
+    "gerber-parser": "4.2.7",
+    "gerber-plotter": "4.2.8",
+    "jsts": "^2.12.1",
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^4.0.0"
+  },
+  "build": {
+    "appId": "app.pcbmarker.desktop",
+    "productName": "PCB Marker",
+    "directories": {
+      "app": ".packaging",
+      "output": "release"
+    },
+    "npmRebuild": false,
+    "files": [
+      "dist/**/*",
+      "package.json",
+      "LICENSE",
+      "THIRD_PARTY_NOTICES.md",
+      "README.md"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "signExecutable": false,
+      "icon": "assets/icon.ico",
+      "artifactName": "PCB-Marker-Windows-x64.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "PCB-Marker-Setup.exe"
+    }
+  },
+  "author": "zufari",
+  "license": "MIT",
+  "homepage": "https://github.com/zufari4/pcb-marker#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zufari4/pcb-marker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zufari4/pcb-marker/issues"
+  },
+  "keywords": [
+    "pcb",
+    "gerber",
+    "klipper",
+    "plotter",
+    "marker",
+    "electron"
+  ],
+  "os": [
+    "win32"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -1,0 +1,36 @@
+name: Windows release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Verify tag
+        shell: pwsh
+        run: |
+          $version = (Get-Content package.json | ConvertFrom-Json).version
+          if ($env:GITHUB_REF_NAME -ne "v$version") { throw 'Tag must match package.json version' }
+      - run: npm test
+      - run: npm run release:win
+      - name: Package npm distribution without publishing
+        run: npm pack --ignore-scripts
+      - name: Publish downloads
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $latest = Get-Content release/latest-build.json | ConvertFrom-Json
+          $directory = Split-Path (Split-Path $latest.executable)
+          $files = @(Get-ChildItem -LiteralPath $directory -File | Where-Object { $_.Extension -in '.exe', '.zip' -or $_.Name -eq 'SHA256SUMS.txt' } | ForEach-Object { $_.FullName })
+          $files += @(Get-ChildItem -Filter '*.tgz' -File | ForEach-Object { $_.FullName })
+          gh release create $env:GITHUB_REF_NAME @files --verify-tag --title "PCB Marker $env:GITHUB_REF_NAME" --notes-file releases/NOTES.md
+          if ($LASTEXITCODE -ne 0) { throw 'Release upload failed' }
