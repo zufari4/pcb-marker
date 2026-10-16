@@ -2,8 +2,7 @@ name: Windows release
 on:
   push:
     tags: ['v*']
-    branches: [main]
-    paths: ['.github/workflows/release.yml', 'scripts/package.mjs']
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
