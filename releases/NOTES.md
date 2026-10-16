@@ -1,17 +1,18 @@
-Первый публичный выпуск PCB Marker.
+The first public release of PCB Marker.
 
-- Gerber ZIP, просмотр обеих сторон и привязка по четырём углам.
-- Визуализация маршрута, пробный прогон и рисование маркером.
-- Прогресс, положение, пауза, продолжение и остановка задания.
-- Отдельные скорости рисования, переходов и движений Z.
-- Русский и английский интерфейс, встроенный JetBrains Mono.
-- «О программе» и ручная проверка обновлений.
+- Open Gerber ZIP files, view both board sides, and align using four corners.
+- Preview the route, perform a dry run, and draw with a marker.
+- Follow progress and position; pause, resume, or stop a job.
+- Set drawing, travel, Z lift, and Z lowering speeds separately.
+- English and Russian interface with the included JetBrains Mono font.
+- About page and manual update checks.
 
-**Windows x64:** `PCB-Marker-Setup.exe` — установка;
-`PCB-Marker-Windows-x64.zip` — запуск после распаковки.
-Сборка не подписана цифровым сертификатом.
+**Windows x64:** use `PCB-Marker-Setup.exe` to install the app, or extract
+`PCB-Marker-Windows-x64.zip` and launch `PCB Marker.exe`.
+These builds are unsigned.
 
-Начальный профиль рассчитан на Creality K1 SE с SSH и Klipper.
-Перед рисованием проверьте привязку и Z касания, выполните пробный прогон.
+The initial profile targets Creality K1 SE with SSH and Klipper.
+Check corner registration and contact Z, then perform a dry run before drawing.
 
-Архив `.tgz` — подготовленный npm-пакет; публикация в реестр npm выполняется отдельно.
+The `.tgz` archive is a ready-to-install npm package. Publication to the npm
+registry is a separate step; until then, install the downloaded archive locally.

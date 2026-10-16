@@ -33,6 +33,7 @@ Klipper-based 3D printer. Author: zufari. Keep the UI friendly and bilingual.
   without an explicit request. npm installation must launch the complete UI.
 - Keep installer/ZIP in GitHub Releases, not Git history. `releases/README.md`
   is the user-facing download directory. Tags `vX.Y.Z` trigger release CI.
-- Update README screenshots using the synthetic demo board, not private input.
+- Use the synthetic board for tests. Publication screenshots may use a user-provided
+  board only when the user explicitly requests it; do not commit the source archive.
 - Public release notes and README describe user capabilities; development detail
   belongs in CONTRIBUTING.md. Keep version numbers consistent with package.json.

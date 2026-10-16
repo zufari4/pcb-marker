@@ -1,15 +1,15 @@
-# Скачать PCB Marker
+# Download PCB Marker
 
-Все готовые версии находятся в [GitHub Releases](https://github.com/zufari4/pcb-marker/releases).
+All published versions are available in [GitHub Releases](https://github.com/zufari4/pcb-marker/releases).
 
-| Вариант | Для кого |
+| Download | How to use it |
 | --- | --- |
-| [Инсталлятор Windows x64](https://github.com/zufari4/pcb-marker/releases/latest/download/PCB-Marker-Setup.exe) | Обычная установка с ярлыком приложения |
-| [ZIP Windows x64](https://github.com/zufari4/pcb-marker/releases/latest/download/PCB-Marker-Windows-x64.zip) | Распакуйте целиком и запустите `PCB Marker.exe` |
-| [SHA-256](https://github.com/zufari4/pcb-marker/releases/latest/download/SHA256SUMS.txt) | Контрольные суммы файлов |
+| [Windows x64 installer](https://github.com/zufari4/pcb-marker/releases/latest/download/PCB-Marker-Setup.exe) | Install the app with a desktop shortcut |
+| [Windows x64 ZIP](https://github.com/zufari4/pcb-marker/releases/latest/download/PCB-Marker-Windows-x64.zip) | Extract the entire archive and open `PCB Marker.exe` |
+| [SHA-256 checksums](https://github.com/zufari4/pcb-marker/releases/latest/download/SHA256SUMS.txt) | Verify the downloaded files |
 
-Приложение не подписано цифровым сертификатом: Windows может показывать
-предупреждение при первом запуске. Скачивайте сборки только со страницы проекта.
+Builds are currently unsigned, so Windows may display a warning on first launch.
+Download the app from this project's release page.
 
-ZIP не требует установки, но настройки хранит в профиле пользователя Windows.
-Сам архив исходников **Source code (zip)** не является готовым приложением.
+The ZIP requires no installation but saves settings in your Windows user profile.
+GitHub's **Source code (zip)** download contains source files, not the ready-to-run app.

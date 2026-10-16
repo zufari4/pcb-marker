@@ -5,7 +5,13 @@ import { demoProfile, createDemoGerber } from "./demo-fixture.mjs";
 await mkdir("docs/screenshots", { recursive: true });
 await mkdir(".artifacts", { recursive: true });
 const profile = await mkdtemp(resolve(".artifacts/publication-"));
-await writeFile(resolve(profile, "settings.json"), JSON.stringify(demoProfile));
+await writeFile(
+  resolve(profile, "settings.json"),
+  JSON.stringify({
+    ...demoProfile,
+    settings: { ...demoProfile.settings, language: "en" },
+  }),
+);
 const env = { ...process.env, PCB_MARKER_DATA_DIR: profile };
 delete env.ELECTRON_RUN_AS_NODE;
 const app = await electron.launch({ args: ["."], env });
@@ -34,12 +40,12 @@ try {
       .getByRole("button", { name, exact: true })
       .click();
   };
-  await menu("О программе");
+  await menu("About");
   await expect(page.locator(".about-content")).toContainText("zufari");
   await expect(page.locator(".about-content")).toContainText("1.0.0");
   await page.screenshot({ path: "docs/screenshots/about.png" });
-  await menu("Проверить обновления");
-  await expect(page.getByRole("status")).toContainText("последняя версия");
+  await menu("Check for updates");
+  await expect(page.getByRole("status")).toContainText("latest version");
   for (const status of ["available", "unpublished", "error"]) {
     await app.evaluate(({ ipcMain }, status) => {
       ipcMain.removeHandler("app:check-updates");
@@ -48,40 +54,44 @@ try {
         return { status, version: "1.1.0" };
       });
     }, status);
-    await menu("Проверить обновления");
+    await menu("Check for updates");
     await expect(page.getByRole("status")).toContainText(
       status === "available"
         ? "1.1.0"
         : status === "unpublished"
-          ? "пока нет"
-          : "Не удалось",
+          ? "No releases"
+          : "Could not connect",
     );
   }
-  await page.getByRole("button", { name: "Назад", exact: true }).click();
-  await menu("Проверить обновления");
+  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await menu("Check for updates");
   await expect(page.locator(".about-page")).toBeVisible();
-  await expect(page.getByRole("status")).toContainText("Не удалось");
-  await page.getByRole("button", { name: "Назад", exact: true }).click();
-  const archive = await createDemoGerber();
+  await expect(page.getByRole("status")).toContainText("Could not connect");
+  await page.getByRole("button", { name: "Back", exact: true }).click();
+  const archive = process.argv[2]
+    ? resolve(process.argv[2])
+    : await createDemoGerber();
   await app.evaluate(({ dialog }, archive) => {
     dialog.showOpenDialog = async () => ({
       canceled: false,
       filePaths: [archive],
     });
   }, archive);
-  await menu("Открыть файл");
+  await menu("Open file");
   await expect(
-    page.getByRole("button", { name: "Визуализация", exact: true }),
+    page.getByRole("button", { name: "Visualization", exact: true }),
   ).toBeEnabled({ timeout: 30000 });
   await page.screenshot({ path: "docs/screenshots/board.png" });
-  await menu("Настройки");
+  await menu("Settings");
   await expect(page.locator(".speed-settings input")).toHaveCount(4);
   await page.screenshot({ path: "docs/screenshots/settings.png" });
-  await page.getByRole("button", { name: "Назад", exact: true }).click();
-  await menu("Привязка по углам");
+  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await menu("Corner registration");
   await page.screenshot({ path: "docs/screenshots/corners.png" });
-  await page.getByRole("button", { name: "Назад", exact: true }).click();
-  await page.getByRole("button", { name: "Визуализация", exact: true }).click();
+  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Visualization", exact: true })
+    .click();
   await page.locator('input[type="range"]').evaluate((el) => {
     Object.getOwnPropertyDescriptor(
       HTMLInputElement.prototype,
