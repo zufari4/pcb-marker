@@ -3,7 +3,7 @@ on:
   push:
     tags: ['v*']
     branches: [main]
-    paths: ['.github/workflows/release.yml']
+    paths: ['.github/workflows/release.yml', 'scripts/package.mjs']
 permissions:
   contents: write
 jobs:

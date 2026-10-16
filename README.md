@@ -80,6 +80,11 @@ The first npm launch may download the desktop runtime.
 5. Choose a board side, inspect **Visualization**, and perform a **Dry run**.
 6. When the alignment is right, select **Start drawing**.
 
+For a double-sided board, **flip it from left to right, like turning a page**.
+Keep the front edge facing the front of the printer. Register all four corners
+again, select **Bottom**, and check the alignment with a dry run before drawing
+the second side.
+
 Register the corners again whenever you move the board or marker.
 Saved coordinates do not replace homing after the motors have been disabled.
 

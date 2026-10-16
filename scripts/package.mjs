@@ -48,6 +48,7 @@ if (install.status) process.exit(install.status);
 const output = `release/build-${metadata.version}-${Date.now()}`;
 const electronExecutable = createRequire(import.meta.url)("electron");
 await build({
+  publish: "never",
   targets: Platform.WINDOWS.createTarget(
     process.argv.includes("--release")
       ? ["nsis", "zip"]
