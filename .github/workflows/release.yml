@@ -32,6 +32,9 @@ jobs:
             '```text' >> $env:GITHUB_STEP_SUMMARY
             Get-Content build-release.log -Tail 80 >> $env:GITHUB_STEP_SUMMARY
             '```' >> $env:GITHUB_STEP_SUMMARY
+            $diagnostic = (Get-Content build-release.log -Tail 45) -join "`n"
+            $diagnostic = $diagnostic.Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A')
+            Write-Output "::error::$diagnostic"
             exit $buildExit
           }
       - name: Package npm distribution without publishing
@@ -45,5 +48,12 @@ jobs:
           $directory = Split-Path (Split-Path $latest.executable)
           $files = @(Get-ChildItem -LiteralPath $directory -File | Where-Object { $_.Extension -in '.exe', '.zip' -or $_.Name -eq 'SHA256SUMS.txt' } | ForEach-Object { $_.FullName })
           $files += @(Get-ChildItem -Filter '*.tgz' -File | ForEach-Object { $_.FullName })
-          gh release create $env:RELEASE_TAG @files --verify-tag --title "PCB Marker $env:RELEASE_TAG" --notes-file releases/NOTES.md
+          gh release view $env:RELEASE_TAG --json tagName 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $env:RELEASE_TAG @files --clobber
+            if ($LASTEXITCODE -ne 0) { throw 'Release upload failed' }
+            gh release edit $env:RELEASE_TAG --title "PCB Marker $env:RELEASE_TAG" --notes-file releases/NOTES.md
+          } else {
+            gh release create $env:RELEASE_TAG @files --verify-tag --title "PCB Marker $env:RELEASE_TAG" --notes-file releases/NOTES.md
+          }
           if ($LASTEXITCODE -ne 0) { throw 'Release upload failed' }
