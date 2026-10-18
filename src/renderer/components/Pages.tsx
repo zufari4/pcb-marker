@@ -7,6 +7,7 @@ import {
   Languages,
   ArrowLeft,
   LoaderCircle,
+  LocateFixed,
 } from "lucide-react";
 import type { CornerKey, Corners, Settings } from "../../shared/model";
 import { fitCorners } from "../../core/registration";
@@ -63,10 +64,28 @@ export function SettingsPage({
   onLanguage(language: Settings["language"]): void;
 }) {
   const t = useT(),
+    language = useContext(LanguageContext),
     [draft, setDraft] = useState(settings),
     [showPassword, setShowPassword] = useState(false),
     [busy, setBusy] = useState(false),
+    [readingZ, setReadingZ] = useState(false),
     [error, setError] = useState("");
+  const connectionChanged =
+    draft.host.trim() !== settings.host ||
+    draft.username.trim() !== settings.username ||
+    draft.password !== settings.password;
+  const readContactZ = async () => {
+    setReadingZ(true);
+    setError("");
+    try {
+      const contactZ = await window.pcb.readContactZ();
+      setDraft((d) => ({ ...d, drawing: { ...d.drawing, contactZ } }));
+    } catch (e) {
+      setError(localizeMessage((e as Error).message, language));
+    } finally {
+      setReadingZ(false);
+    }
+  };
   const field = (
     key: "printerName" | "host" | "username" | "password",
     label: string,
@@ -106,32 +125,58 @@ export function SettingsPage({
     help: string,
     unit: string,
   ) => (
-    <label className="setting-row drawing-field">
-      <span>{label}</span>
-      <div className="input-wrap">
-        <input
-          type="number"
-          step={key === "contactZ" ? ".001" : ".1"}
-          min={key === "zLiftSpeed" || key === "zLowerSpeed" ? 0.1 : undefined}
-          max={key === "zLiftSpeed" || key === "zLowerSpeed" ? 5 : undefined}
-          aria-label={label}
-          value={Number.isNaN(draft.drawing[key]) ? "" : draft.drawing[key]}
-          onChange={(e) =>
-            setDraft((d) => ({
-              ...d,
-              drawing: {
-                ...d.drawing,
-                [key]: e.target.value === "" ? NaN : Number(e.target.value),
-              },
-            }))
-          }
-        />
-        <span className="unit">{unit}</span>
+    <div className="setting-row drawing-field">
+      <label htmlFor={`drawing-${key}`}>{label}</label>
+      <div className="drawing-input">
+        <div className="input-wrap">
+          <input
+            id={`drawing-${key}`}
+            disabled={key === "contactZ" && readingZ}
+            type="number"
+            step={key === "contactZ" ? ".001" : ".1"}
+            min={
+              key === "zLiftSpeed" || key === "zLowerSpeed" ? 0.1 : undefined
+            }
+            max={key === "zLiftSpeed" || key === "zLowerSpeed" ? 5 : undefined}
+            aria-label={label}
+            value={Number.isNaN(draft.drawing[key]) ? "" : draft.drawing[key]}
+            onChange={(e) =>
+              setDraft((d) => ({
+                ...d,
+                drawing: {
+                  ...d.drawing,
+                  [key]: e.target.value === "" ? NaN : Number(e.target.value),
+                },
+              }))
+            }
+          />
+          <span className="unit">{unit}</span>
+        </div>
+        {key === "contactZ" && (
+          <span
+            title={t(connected ? "readContactZ" : "readContactZDisconnected")}
+          >
+            <button
+              type="button"
+              className="read-position"
+              aria-label={t("readContactZ")}
+              aria-busy={readingZ}
+              disabled={!connected || connecting || busy || readingZ}
+              onClick={readContactZ}
+            >
+              {readingZ ? (
+                <LoaderCircle size={18} className="spin" />
+              ) : (
+                <LocateFixed size={18} />
+              )}
+            </button>
+          </span>
+        )}
       </div>
       <HelpCircle size={17} className="help" aria-label={help}>
         <title>{help}</title>
       </HelpCircle>
-    </label>
+    </div>
   );
   const save = async (connect = false) => {
     setBusy(true);
@@ -203,7 +248,12 @@ export function SettingsPage({
             </span>
             <button
               className="primary"
-              disabled={busy}
+              disabled={
+                busy ||
+                readingZ ||
+                connecting ||
+                (connected && !connectionChanged)
+              }
               onClick={() => void save(true)}
             >
               {busy ? <LoaderCircle className="spin" size={18} /> : null}
@@ -273,7 +323,7 @@ export function SettingsPage({
       <div className="settings-footer">
         <button
           className="primary save-button"
-          disabled={busy}
+          disabled={busy || readingZ}
           onClick={() => void save()}
         >
           {t("save")}

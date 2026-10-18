@@ -218,6 +218,14 @@ function registerIpc(): void {
     cancelWorker?.();
   });
   handle("printer:connect", connectPrinter);
+  handle("printer:read-contact-z", async () => {
+    if (active()) throw new Error("Сначала завершите задание.");
+    const state = await api.status();
+    const contactZ = state.position[2];
+    if (!Number.isFinite(contactZ) || contactZ < 0 || contactZ > 245)
+      throw new Error("Z касания должен быть от 0 до 245 мм.");
+    return Math.round(contactZ * 1000) / 1000;
+  });
   handle("corners:capture", async (value) => {
     if (active()) throw new Error("Сначала завершите задание.");
     const key = z.enum(["fl", "fr", "rr", "rl"]).parse(value);
@@ -255,6 +263,7 @@ function registerIpc(): void {
       store.settings.drawing,
       state.position,
       z.boolean().parse(dry),
+      state.limits,
     );
     const result = await dialog.showSaveDialog(window, {
       defaultPath: `${side}_${dry ? "dry_run" : "draw"}.gcode`,

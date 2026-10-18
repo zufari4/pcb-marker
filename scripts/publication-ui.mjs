@@ -20,7 +20,7 @@ try {
   const page = await app.firstWindow();
   page.on("pageerror", (e) => errors.push(e.message));
   await expect(page.locator(".brand")).toBeVisible();
-  await app.evaluate(({ ipcMain }) => {
+  await app.evaluate(({ ipcMain, app }) => {
     for (const channel of ["printer:connect", "job:start", "job:control"]) {
       ipcMain.removeHandler(channel);
       ipcMain.handle(channel, () => {
@@ -30,7 +30,7 @@ try {
     ipcMain.removeHandler("app:check-updates");
     ipcMain.handle("app:check-updates", () => ({
       status: "current",
-      version: "1.0.0",
+      version: app.getVersion(),
     }));
   });
   const menu = async (name) => {
@@ -42,7 +42,9 @@ try {
   };
   await menu("About");
   await expect(page.locator(".about-content")).toContainText("zufari");
-  await expect(page.locator(".about-content")).toContainText("1.0.0");
+  await expect(page.locator(".about-content")).toContainText(
+    await app.evaluate(({ app }) => app.getVersion()),
+  );
   await page.screenshot({ path: "docs/screenshots/about.png" });
   await menu("Check for updates");
   await expect(page.getByRole("status")).toContainText("latest version");

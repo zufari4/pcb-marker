@@ -65,7 +65,7 @@ This opens the full desktop app. You can also download the `.tgz`
 package from [Releases](https://github.com/zufari4/pcb-marker/releases/latest) and install it locally:
 
 ```sh
-npm install -g ./pcb-marker-desktop-1.0.0.tgz
+npm install -g ./pcb-marker-desktop-1.0.1.tgz
 pcb-marker
 ```
 

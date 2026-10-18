@@ -1,6 +1,6 @@
 {
   "name": "pcb-marker-desktop",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Gerber PCB marker plotter for Klipper printers",
   "type": "module",
   "engines": {

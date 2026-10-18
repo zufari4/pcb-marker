@@ -1,5 +1,9 @@
 export type XY = [number, number];
 export type XYZ = [number, number, number];
+export interface MotionLimits {
+  min: XYZ;
+  max: XYZ;
+}
 export type Side = "top" | "bottom";
 export type LayerView = Side | "both";
 export type CornerKey = "fl" | "fr" | "rr" | "rl";
@@ -79,6 +83,8 @@ export interface PrinterStatus {
   homed: string;
   position: XYZ;
   positionSource?: "live" | "commanded";
+  /** Travel limits expressed in the same G-code coordinates as position. */
+  limits?: MotionLimits;
   state: string;
   filename: string;
   progress: number;
@@ -130,6 +136,7 @@ export interface Api {
   dropBoard(file: File): Promise<Board | null>;
   cancelLoad(): Promise<void>;
   connect(): Promise<PrinterStatus>;
+  readContactZ(): Promise<number>;
   captureCorner(key: CornerKey): Promise<Corners>;
   resetCorners(): Promise<Corners>;
   startJob(side: Side, dry: boolean): Promise<Job>;

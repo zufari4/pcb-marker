@@ -3,6 +3,7 @@ import { _electron as electron, expect } from "@playwright/test";
 import { resolve } from "node:path";
 import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { createProgram } from "../src/core/program.ts";
+const { version } = JSON.parse(await readFile("package.json", "utf8"));
 await mkdir(".artifacts/screens", { recursive: true });
 const profile = await mkdtemp(resolve(".artifacts/ui-run-"));
 const seed = structuredClone(demoProfile);
@@ -84,7 +85,97 @@ try {
   await expect(page.getByLabel("Z lowering", { exact: true })).toHaveValue("3");
   await page.getByLabel("Z lift", { exact: true }).fill("2.5");
   await page.getByLabel("Z lowering", { exact: true }).fill("0.7");
+  const readZ = page.getByRole("button", {
+    name: "Read current Z position",
+    exact: true,
+  });
+  await expect(readZ).toBeDisabled();
+  // Exercise the real preload/IPC path while keeping all printer access simulated.
+  await expect(
+    page.evaluate(() => window.pcb.readContactZ()),
+  ).rejects.toThrow();
+  await app.evaluate(({ ipcMain, BrowserWindow }) => {
+    ipcMain.removeHandler("printer:read-contact-z");
+    ipcMain.handle("printer:read-contact-z", async () => {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      return 16.123;
+    });
+    BrowserWindow.getAllWindows()[0].webContents.send("printer:status", {
+      connected: true,
+      state: "standby",
+      position: [100, 100, 16.123],
+    });
+  });
+  await expect(readZ).toBeEnabled();
+  const connectButton = page.getByRole("button", {
+    name: "Connect",
+    exact: true,
+  });
+  await expect(connectButton).toBeDisabled();
+  await page.getByLabel("Printer name", { exact: true }).fill("Test printer");
+  await expect(connectButton).toBeDisabled();
+  await page
+    .getByLabel("Printer name", { exact: true })
+    .fill(seed.settings.printerName);
+  for (const [label, original, changed] of [
+    ["IP address", seed.settings.host, "127.0.0.2"],
+    ["Username", seed.settings.username, "test-user"],
+    ["Password", seed.settings.password, "test-password"],
+  ]) {
+    const input = page.getByRole("textbox", { name: label, exact: true });
+    const field =
+      label === "Password" ? page.locator('input[type="password"]') : input;
+    await field.fill(changed);
+    await expect(connectButton).toBeEnabled();
+    await field.fill(original);
+    await expect(connectButton).toBeDisabled();
+  }
+  await page
+    .getByLabel("IP address", { exact: true })
+    .fill(` ${seed.settings.host} `);
+  await expect(connectButton).toBeDisabled();
+  await page.getByLabel("IP address", { exact: true }).fill(seed.settings.host);
+  await readZ.click();
+  await expect(readZ).toBeDisabled();
+  await expect(
+    page.getByRole("button", { name: "Save", exact: true }),
+  ).toBeDisabled();
+  await page.getByLabel("Drawing speed", { exact: true }).fill("9.5");
+  await expect(page.getByLabel("Contact Z", { exact: true })).toHaveValue(
+    "16.123",
+  );
+  await expect(page.getByLabel("Drawing speed", { exact: true })).toHaveValue(
+    "9.5",
+  );
+  expect(
+    await page.evaluate(
+      async () => (await window.pcb.snapshot()).settings.drawing.contactZ,
+    ),
+  ).toBe(seed.settings.drawing.contactZ);
+  await app.evaluate(({ ipcMain }) => {
+    ipcMain.removeHandler("printer:read-contact-z");
+    ipcMain.handle("printer:read-contact-z", () => {
+      throw new Error("Принтер не подключён.");
+    });
+  });
+  await readZ.click();
+  await expect(page.getByRole("alert")).toContainText(
+    "The printer is not connected.",
+  );
+  await expect(page.getByLabel("Contact Z", { exact: true })).toHaveValue(
+    "16.123",
+  );
+  await expect(readZ).toBeEnabled();
+  await app.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].webContents.send("printer:status", {
+      connected: false,
+      state: "disconnected",
+      position: [100, 100, 16.123],
+    });
+  });
+  await expect(readZ).toBeDisabled();
   await page.locator(".frame-setting .help-tip").hover();
+  await expect(connectButton).toBeEnabled();
   await expect(page.getByRole("tooltip")).toContainText(
     "without touching the board",
   );
@@ -97,6 +188,8 @@ try {
   );
   expect(savedDrawing.zLiftSpeed).toBe(2.5);
   expect(savedDrawing.zLowerSpeed).toBe(0.7);
+  expect(savedDrawing.contactZ).toBe(16.123);
+  expect(savedDrawing.drawSpeed).toBe(9.5);
   const archive = process.argv[2] ?? (await createDemoGerber());
   await app.evaluate(({ dialog }, file) => {
     dialog.showOpenDialog = async () => ({
@@ -115,7 +208,7 @@ try {
   await expect(
     page.getByRole("button", { name: "Both sides", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
-  await expect(page.locator(".app-version")).toHaveText("v1.0.0");
+  await expect(page.locator(".app-version")).toHaveText(`v${version}`);
   for (const name of ["Dry run", "Start drawing"]) {
     const button = page.getByRole("button", { name, exact: true });
     await expect(button).toBeDisabled();

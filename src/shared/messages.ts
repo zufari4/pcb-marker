@@ -10,6 +10,11 @@ export function resolveLanguage(
     : setting;
 }
 const translations: Record<string, string> = {
+  "Не удалось считать пределы перемещения принтера.":
+    "Could not read the printer travel limits.",
+  "Допустимый диапазон:": "Allowed range:",
+  "Z касания должен быть от 0 до 245 мм.":
+    "Contact Z must be between 0 and 245 mm.",
   "Считайте все четыре угла заготовки.": "Read all four blank corners.",
   "Углы перепутаны или совпадают.": "Corners are out of order or overlap.",
   "Углы не образуют прямоугольник: отклонение":

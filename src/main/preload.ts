@@ -15,6 +15,7 @@ const api: Api = {
     ipcRenderer.invoke("board:drop", webUtils.getPathForFile(file)),
   cancelLoad: () => ipcRenderer.invoke("board:cancel"),
   connect: () => ipcRenderer.invoke("printer:connect"),
+  readContactZ: () => ipcRenderer.invoke("printer:read-contact-z"),
   captureCorner: (key) => ipcRenderer.invoke("corners:capture", key),
   resetCorners: () => ipcRenderer.invoke("corners:reset"),
   startJob: (side, dry) => ipcRenderer.invoke("job:start", side, dry),

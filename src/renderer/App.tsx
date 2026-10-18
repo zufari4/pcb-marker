@@ -305,6 +305,8 @@ function Workspace({
               110,
               settings.drawing.contactZ + settings.drawing.lift,
             ],
+            false,
+            printer?.limits,
           ),
           machine: true,
         };

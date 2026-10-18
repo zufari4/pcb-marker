@@ -1,18 +1,15 @@
-The first public release of PCB Marker.
+## What's new in 1.0.1
 
-- Open Gerber ZIP files, view both board sides, and align using four corners.
-- Preview the route, perform a dry run, and draw with a marker.
-- Follow progress and position; pause, resume, or stop a job.
-- Set drawing, travel, Z lift, and Z lowering speeds separately.
-- English and Russian interface with the included JetBrains Mono font.
-- About page and manual update checks.
+- **Read contact Z from the printer.** A new crosshair button beside Contact Z reads the current Z position into the field. Save when ready to keep the value.
+- **Smarter connection button.** Connect stays disabled while already connected with unchanged connection details. Editing the address, username, or password enables it again; changing drawing settings or the printer name does not.
+- **Use the printer's actual travel limits.** Drawing, dry runs, G-code export, and pause/stop moves now use the limits reported by Klipper, including coordinate offsets. This fixes false out-of-bounds errors caused by the former fixed 220 mm X/Y limit.
+- **Clearer movement errors.** Out-of-bounds messages identify the affected axis and its allowed range. The route is checked again immediately before launch.
 
-**Windows x64:** use `PCB-Marker-Setup.exe` to install the app, or extract
-`PCB-Marker-Windows-x64.zip` and launch `PCB Marker.exe`.
-These builds are unsigned.
+## Downloads
 
-The initial profile targets Creality K1 SE with SSH and Klipper.
-Check corner registration and contact Z, then perform a dry run before drawing.
+- **PCB-Marker-Setup.exe** — Windows x64 installer.
+- **PCB-Marker-Windows-x64.zip** — extract the entire archive and launch `PCB Marker.exe`.
+- **pcb-marker-desktop-1.0.1.tgz** — npm package archive; install with `npm install -g ./pcb-marker-desktop-1.0.1.tgz`, then run `pcb-marker`.
+- **SHA256SUMS.txt** — checksums for the installer and ZIP.
 
-The `.tgz` archive is a ready-to-install npm package. Publication to the npm
-registry is a separate step; until then, install the downloaded archive locally.
+Windows builds include the desktop runtime and are unsigned. Existing settings are preserved.

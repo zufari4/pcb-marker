@@ -1,6 +1,7 @@
 import { Client, type ClientChannel } from "ssh2";
 import { createHash } from "node:crypto";
 import type { PrinterStatus, Settings, XYZ } from "../shared/model";
+import { gcodeMotionLimits } from "../core/limits";
 
 interface Pending {
   resolve(value: unknown): void;
@@ -166,7 +167,7 @@ export class KlipperConnection {
     const objects: Record<string, string[]> = {
       print_stats: ["state", "filename", "message"],
       idle_timeout: ["state"],
-      toolhead: ["homed_axes"],
+      toolhead: ["homed_axes", "axis_minimum", "axis_maximum"],
       gcode_move: ["gcode_position", "position"],
       virtual_sdcard: ["progress", "file_position", "is_active"],
       extruder: ["temperature", "target"],
@@ -188,6 +189,12 @@ export class KlipperConnection {
       connected: true,
       homed: s.toolhead.homed_axes,
       position: position as XYZ,
+      limits: gcodeMotionLimits(
+        s.toolhead.axis_minimum,
+        s.toolhead.axis_maximum,
+        s.gcode_move.position,
+        s.gcode_move.gcode_position,
+      ),
       positionSource: s.motion_report?.live_position ? "live" : "commanded",
       state: s.print_stats.state,
       filename: s.print_stats.filename,

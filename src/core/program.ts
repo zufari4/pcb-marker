@@ -3,6 +3,7 @@ import type {
   Corners,
   DrawingSettings,
   Motion,
+  MotionLimits,
   Operation,
   Program,
   Side,
@@ -11,6 +12,7 @@ import type {
 } from "../shared/model";
 import { drawingSchema } from "../shared/settings";
 import { distance, fitCorners, machinePoint } from "./registration";
+import { defaultMotionLimits } from "./limits";
 
 export function boardStrokes(
   board: Board,
@@ -38,14 +40,16 @@ export function boardStrokes(
     ...layer.strokes,
   ];
 }
-export function assertPosition(p: XYZ): void {
-  if (
-    !p.every(
-      (v, i) => Number.isFinite(v) && v >= 0 && v <= (i === 2 ? 250 : 220),
-    )
-  )
+export function assertPosition(
+  p: XYZ,
+  limits: MotionLimits = defaultMotionLimits,
+): void {
+  const axis = p.findIndex(
+    (v, i) => !Number.isFinite(v) || v < limits.min[i] || v > limits.max[i],
+  );
+  if (axis !== -1)
     throw new Error(
-      `Сопло выходит за допустимую область: X ${p[0].toFixed(3)}, Y ${p[1].toFixed(3)}, Z ${p[2].toFixed(3)} мм.`,
+      `Сопло выходит за допустимую область: ${"XYZ"[axis]} ${p[axis].toFixed(3)} мм. Допустимый диапазон: ${limits.min[axis].toFixed(3)} … ${limits.max[axis].toFixed(3)} мм.`,
     );
 }
 export function createProgram(
@@ -55,6 +59,7 @@ export function createProgram(
   settings: DrawingSettings,
   origin: XYZ,
   dry = false,
+  limits: MotionLimits = defaultMotionLimits,
 ): Program {
   const cfg = drawingSchema.parse(settings),
     reg = fitCorners(corners);
@@ -65,7 +70,7 @@ export function createProgram(
     throw new Error(
       "Рисунок больше заготовки, измеренной по углам. Масштаб остаётся 1:1.",
     );
-  assertPosition(origin);
+  assertPosition(origin, limits);
   const strokes = boardStrokes(board, side, cfg.frame);
   if (!strokes.length) throw new Error("На выбранной стороне нет траекторий.");
   return compileProgram(
@@ -80,6 +85,7 @@ export function createProgram(
     side,
     dry,
     true,
+    limits,
   );
 }
 /** The preview and printer share this exact motion compiler. */
@@ -90,6 +96,7 @@ export function compileProgram(
   side: Side,
   dry: boolean,
   validate = false,
+  limits: MotionLimits = defaultMotionLimits,
 ): Program {
   const travelZ = cfg.contactZ + cfg.lift;
   const lines = [
@@ -113,7 +120,7 @@ export function compileProgram(
     dwell = false,
     path = false,
   ) => {
-    if (validate) assertPosition(to);
+    if (validate) assertPosition(to, limits);
     const line = dwell
       ? "G4 P100"
       : `G1 ${zOnly ? `Z${to[2].toFixed(3)}` : `X${to[0].toFixed(3)} Y${to[1].toFixed(3)}`} F${Math.round(speed * 60)}`;

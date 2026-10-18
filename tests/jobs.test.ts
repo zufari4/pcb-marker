@@ -75,6 +75,26 @@ test("pause raises, resume delegates to saved Klipper pause state, stop returns 
   assert.equal(scripts.at(-1), "CANCEL_PRINT_BASE");
   assert.ok(!scripts.join("\n").includes("M84"));
 });
+test("pause and stop respect firmware travel limits beyond the default bed size", async () => {
+  const { controller, scripts, setState } = setup();
+  setState({
+    position: [225, 90, 18],
+    limits: { min: [0, 0, 0], max: [230, 225, 250] },
+  });
+  controller.job!.program.returnPosition = [225, 90, 18];
+  await controller.control("pause");
+  await controller.control("stop");
+  assert.ok(scripts.some((s) => s.includes("X225.000 Y90.000")));
+  const blocked = setup();
+  blocked.setState({
+    paused: true,
+    position: [225, 90, 18],
+    limits: { min: [0, 0, 0], max: [224, 225, 250] },
+  });
+  await assert.rejects(blocked.controller.control("pause"), /X 225.000/);
+  assert.ok(blocked.scripts.every((s) => !s.includes("G1")));
+});
+
 test("job control cannot touch a different job or move with lost homing", async () => {
   const a = setup();
   a.setState({ filename: "ordinary_3d.gcode" });

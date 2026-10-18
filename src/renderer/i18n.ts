@@ -48,6 +48,9 @@ export const english = {
   drawing: "Drawing",
   tracing: "Following path",
   contactZ: "Contact Z",
+  readContactZ: "Read current Z position",
+  readContactZDisconnected:
+    "Connect the printer to read its current Z position",
   lift: "Lift",
   drawSpeed: "Drawing speed",
   travelSpeed: "Travel speed",
@@ -185,6 +188,9 @@ const russian: Record<Key, string> = {
   drawing: "Рисование",
   tracing: "Проход по рисунку",
   contactZ: "Z касания",
+  readContactZ: "Считать текущее положение Z",
+  readContactZDisconnected:
+    "Подключите принтер, чтобы считать текущее положение Z",
   lift: "Отрыв",
   drawSpeed: "Скорость рисования",
   travelSpeed: "Скорость переходов",

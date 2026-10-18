@@ -59,6 +59,7 @@ export class JobController {
         cfg,
         state.position,
         dry,
+        state.limits,
       );
       const id = randomUUID().replaceAll("-", "");
       const job: Job = {
@@ -78,6 +79,10 @@ export class JobController {
           throw new Error(
             "Голова переместилась после подготовки. Повторите запуск.",
           );
+        for (const motion of program.motions) {
+          assertPosition(motion.from, current.limits);
+          assertPosition(motion.to, current.limits);
+        }
         await this.api.script(
           `M104 S0\nM140 S0\nM220 S100\nM221 S100\nSDCARD_PRINT_FILE FILENAME=${job.filename}`,
         );
@@ -130,14 +135,17 @@ export class JobController {
         );
       }
       const safeZ = Math.max(status.position[2], job.program.travelZ);
-      assertPosition([status.position[0], status.position[1], safeZ]);
+      assertPosition(
+        [status.position[0], status.position[1], safeZ],
+        status.limits,
+      );
       if (action === "pause") {
         await this.api.script(`G90\nG1 Z${safeZ.toFixed(3)} F${zFeed}\nM400`);
         return this.update({ ...job, state: "paused", error: undefined });
       }
       try {
         const [x, y] = job.program.returnPosition;
-        assertPosition([x, y, safeZ]);
+        assertPosition([x, y, safeZ], status.limits);
         await this.api.script(
           `G90\nG1 Z${safeZ.toFixed(3)} F${zFeed}\nM400\nG1 X${x.toFixed(3)} Y${y.toFixed(3)} F1800\nM400`,
         );
